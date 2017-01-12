@@ -1,6 +1,6 @@
 'use strict';
 
-var fs = require('fs');
+var nodeFs = require('fs');
 var MatcherCollection = require('matcher-collection');
 var ensurePosix = require('ensure-posix-path');
 
@@ -47,6 +47,7 @@ function _walkSync(baseDir, options, _relativePath) {
   var globs = options.globs;
   var ignorePatterns = options.ignore;
   var globMatcher, ignoreMatcher;
+  var fs = options.fs || nodeFs;
   var results = [];
 
   if (ignorePatterns) {
@@ -70,7 +71,7 @@ function _walkSync(baseDir, options, _relativePath) {
     }
 
     var fullPath = baseDir + '/' + entryRelativePath;
-    var stats = getStat(fullPath);
+    var stats = getStat(fullPath, fs);
 
     if (stats && stats.isDirectory()) {
       return new Entry(entryRelativePath + '/', baseDir, stats.mode, stats.size, stats.mtime.getTime());
@@ -128,7 +129,7 @@ Entry.prototype.isDirectory = function () {
   return (this.mode & 61440) === 16384;
 };
 
-function getStat(path) {
+function getStat(path, fs) {
   var stat;
 
   try {

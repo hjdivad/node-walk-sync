@@ -5,6 +5,7 @@ var tap = require('tap');
 var test = tap.test;
 var walkSync = require('../');
 var symlink = require('./utils/symlink');
+var fs = require('fs');
 
 function captureError(fn) {
   try {
@@ -269,6 +270,26 @@ test('walksync with ignore pattern', function (t) {
     'foo.txt',
     'some-other-dir/qux.txt',
     'symlink1/qux.txt'
+  ]);
+
+  t.end();
+});
+
+test('walksync with custom fs', function(t) {
+  t.deepEqual(walkSync('test/fixtures/foo', {
+    fs: {
+      readdirSync: function(path) {
+        return fs.readdirSync(path.replace('/foo', '/dir'));
+      },
+      statSync: function(path) {
+        return fs.statSync(path.replace('/foo', '/dir'));
+      }
+    }
+  }), [
+    'bar.txt',
+    'subdir/',
+    'subdir/baz.txt',
+    'zzz.txt'
   ]);
 
   t.end();
